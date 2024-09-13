@@ -4,6 +4,7 @@ import morgan from "morgan";
 import cors from "cors";
 import bodyParser from "body-parser";
 import ticketRoutes from "./routes/ticketRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import path from "path";
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/public", express.static(path.join("public")));
 
 // Routes
+app.use("/api", authRoutes);
 app.use("/api/tickets", ticketRoutes);
 
 export default app;
