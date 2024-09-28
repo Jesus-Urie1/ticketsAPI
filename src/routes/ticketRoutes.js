@@ -28,7 +28,7 @@ router.get("/:email", getTicketsByEmail);
 //Obtener Chat de Ticket
 router.get("/chat/:id", getChat);
 //Descargar Files de Tickets
-router.get("/download/:id/:filename", authMiddleware, downloadFile);
+router.get("/download/:id/:filename", downloadFile);
 //Asignar Tecnico
 router.post("/assign", (req, res) => {
   authMiddleware;

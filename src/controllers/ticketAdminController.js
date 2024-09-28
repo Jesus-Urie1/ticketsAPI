@@ -93,24 +93,5 @@ export const downloadFile = (req, res) => {
   const { id, filename } = req.params;
   const filePath = path.join("public", "Tickets", id, filename);
 
-  // Verify if the file exists
-  fs.access(filePath, fs.constants.F_OK, (err) => {
-    if (err) {
-      console.error("File not found:", filePath);
-      return res.status(404).send("File not found");
-    }
-
-    // Stream the file
-    const fileStream = fs.createReadStream(filePath);
-
-    // Set the appropriate headers
-    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-    res.setHeader("Content-Type", "application/octet-stream");
-
-    // Pipe the file stream to the response
-    fileStream.pipe(res).on("error", (streamErr) => {
-      console.error("Error during file streaming:", streamErr);
-      res.status(500).send("Error downloading file");
-    });
-  });
+  res.download(filePath);
 };
