@@ -1,64 +1,7 @@
 // src/controllers/ticketController.js
 import fs from "fs/promises";
 import path from "path";
-
-export const createTicket = async (req, res) => {
-  try {
-    // Extract the fields and files from the request
-    const {
-      id,
-      solicitante,
-      email,
-      departamento,
-      prioridad,
-      tipo,
-      descripcion,
-    } = req.body;
-    const files = req.files; // This will contain the uploaded files
-
-    if (!id) {
-      throw new Error("ID is required");
-    }
-
-    // Create the ticket directory
-    const ticketDir = path.join("public", "Tickets", id);
-    await fs.mkdir(ticketDir, { recursive: true });
-
-    // Save attached files
-    let savedFiles = [];
-    if (files && files.length > 0) {
-      for (const file of files) {
-        const filePath = path.join(ticketDir, file.originalname);
-        await fs.writeFile(filePath, file.buffer);
-
-        const size = (file.size / 1024).toFixed(2) + " KB";
-        savedFiles.push({ fileName: file.originalname, size });
-      }
-    }
-
-    // Save ticket information in a JSON file
-    const ticketInfo = {
-      id,
-      solicitante,
-      email,
-      departamento,
-      prioridad,
-      estado: "Abierto",
-      tipo,
-      descripcion,
-      fechaAbierto: new Date().toISOString(),
-      files: savedFiles,
-    };
-
-    const infoPath = path.join(ticketDir, "info.json");
-    await fs.writeFile(infoPath, JSON.stringify(ticketInfo, null, 2), "utf-8");
-
-    res.status(200).json({ message: "Ticket creado con éxito" });
-  } catch (error) {
-    console.error("Error al crear el ticket:", error);
-    res.status(500).json({ message: "Error al crear el ticket" });
-  }
-};
+import { io } from "../../server.js";
 
 export const getTickets = async (req, res) => {
   try {
@@ -108,7 +51,7 @@ export const assignTechnician = async (req, res) => {
     ticketData.fechaAsignacion = new Date().toISOString();
 
     await fs.writeFile(infoPath, JSON.stringify(ticketData, null, 2), "utf-8");
-
+    io.emit("updateTicket", ticketData);
     return res.status(200).json({ message: "Técnico asignado con éxito" });
   } catch (error) {
     console.error("Error al asignar técnico:", error);
@@ -146,14 +89,28 @@ export const closeTicket = async (req, res) => {
   }
 };
 
-export const downloadFile = async (req, res) => {
+export const downloadFile = (req, res) => {
   const { id, filename } = req.params;
   const filePath = path.join("public", "Tickets", id, filename);
 
-  res.download(filePath, filename, (err) => {
+  // Verify if the file exists
+  fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) {
-      console.error("Error downloading file:", err);
-      res.status(500).send("Error downloading file");
+      console.error("File not found:", filePath);
+      return res.status(404).send("File not found");
     }
+
+    // Stream the file
+    const fileStream = fs.createReadStream(filePath);
+
+    // Set the appropriate headers
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Content-Type", "application/octet-stream");
+
+    // Pipe the file stream to the response
+    fileStream.pipe(res).on("error", (streamErr) => {
+      console.error("Error during file streaming:", streamErr);
+      res.status(500).send("Error downloading file");
+    });
   });
 };

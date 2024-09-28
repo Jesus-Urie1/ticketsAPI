@@ -4,8 +4,12 @@ import jwt from "jsonwebtoken";
 const users = [
   // This is a mock data, normally you'll fetch users from a database.
   {
-    user: "admin",
-    password: await bcrypt.hash("AdH51*min", 10),
+    user: "Erika",
+    password: await bcrypt.hash("Erika123", 10),
+  },
+  {
+    user: "Jesus",
+    password: await bcrypt.hash("Jesus123", 10),
   },
 ];
 

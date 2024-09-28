@@ -1,22 +1,24 @@
-// src/websockets/websocketServer.js
 import { Server } from "socket.io";
+import { handleChatMessages } from "../controllers/chatController.js";
 
-export function setupWebSocketServer(server) {
-  // Setup Socket.IO
+export const setupWebSocketServer = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: "*",
+      origin: "*", // You can replace '*' with your frontend domain for security
       methods: ["GET", "POST"],
     },
   });
 
   io.on("connection", (socket) => {
-    console.log("New client connected:", socket.id);
+    console.log("New WebSocket connection established");
+
+    // Handle chat messages
+    handleChatMessages(socket);
 
     socket.on("disconnect", () => {
-      console.log("Client disconnected:", socket.id);
+      console.log("User disconnected");
     });
   });
 
   return io;
-}
+};
