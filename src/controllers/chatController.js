@@ -36,22 +36,16 @@ const saveMessageToFile = async (ticketId, messageData) => {
   );
 };
 
-export const handleChatMessages = (socket) => {
-  socket.on("joinRoom", (ticketId) => {
-    socket.join(ticketId);
-    console.log(`User joined room for ticket ${ticketId}`);
-  });
-
+export const handleChatMessages = (socket, io) => {
   socket.on("sendMessage", async (messageData) => {
-    // Save the message to a JSON file
+    console.log("Received message from client:", messageData);
+    // Guarda el mensaje en un archivo o base de datos
     await saveMessageToFile(messageData.ticketId, messageData);
 
-    // Broadcast the message to other users in the room
-    socket.to(messageData.ticketId).emit("receiveMessage", messageData);
-  });
+    // Emitir el mensaje a todos los usuarios conectados, incluido el remitente
+    io.emit("receiveMessage", messageData); // Esto envía el mensaje a todos
 
-  socket.on("leaveRoom", (ticketId) => {
-    socket.leave(ticketId);
-    console.log(`User left room for ticket ${ticketId}`);
+    // O bien, si solo quieres enviarlo a todos excepto al remitente:
+    // socket.broadcast.emit("receiveMessage", messageData);
   });
 };

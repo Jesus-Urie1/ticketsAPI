@@ -81,7 +81,7 @@ export const closeTicket = async (req, res) => {
     ticketData.fechaCerrado = new Date().toISOString();
 
     await fs.writeFile(infoPath, JSON.stringify(ticketData, null, 2), "utf-8");
-
+    io.emit("updateTicket", ticketData);
     return res.status(200).json({ message: "Ticket cerrado con éxito" });
   } catch (error) {
     console.error("Error al cerrar el ticket:", error);

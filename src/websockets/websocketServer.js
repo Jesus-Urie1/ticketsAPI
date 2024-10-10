@@ -13,7 +13,7 @@ export const setupWebSocketServer = (server) => {
     console.log("New WebSocket connection established");
 
     // Handle chat messages
-    handleChatMessages(socket);
+    handleChatMessages(socket, io);
 
     socket.on("disconnect", () => {
       console.log("User disconnected");
