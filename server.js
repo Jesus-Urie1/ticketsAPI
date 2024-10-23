@@ -9,8 +9,8 @@ dotenv.config();
 
 // Ruta a los certificados SSL
 const sslOptions = {
-  key: fs.readFileSync("./certificados/localhost-key.pem"),
-  cert: fs.readFileSync("./certificados/localhost.pem"),
+  key: fs.readFileSync("./certificados/187.141.204.178-key.pem"),
+  cert: fs.readFileSync("./certificados/187.141.204.178.pem"),
 };
 
 // Crea el servidor HTTPS
